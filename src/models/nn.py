@@ -60,7 +60,7 @@ def init_layers(nn_architecture, seed=42):
     return params
 
 
-# -------------------------------- Activations Functions ---------------------------------
+# ---------------------------- Activations Functions ---------------------------------
 
 def relu(Z):
     return np.maximum(0, Z)
@@ -74,6 +74,7 @@ def relu_backprop():
 def sigmoid_backprop():
     pass
 
+# -------------------------------- Forward Pass --------------------------------------
 def single_forward_propagation(A_prev, W_curr, b_curr, activation="relu"):
     '''
     Forward propagation for a single layer.
@@ -132,7 +133,7 @@ def full_forward_propagation(X, params, nn_architecture):
     return A_curr, memory
 
 
-
+# ---------------------------------- Loss & Accuracy ----------------------------------
 def loss_function(y_hat, y):
     '''
     Calculate loss function.
@@ -182,7 +183,7 @@ def accuracy(y_hat, y):
     return (y_hat_ == y).all(axis=0).mean()
 
 
-
+# -------------------------------- Backpropagation -----------------------------------
 def single_backprop():
     pass
 
