@@ -68,11 +68,14 @@ def relu(Z):
 def sigmoid(Z):
     return 1 / (1 + np.exp(-Z))
 
-def relu_backprop():
-    pass
+def relu_backprop(dA, Z):
+    dZ = np.array(dA, copy=True)
+    dZ[dZ >= 0] = 0
+    return dZ    
 
-def sigmoid_backprop():
-    pass
+def sigmoid_backprop(dA, Z):
+    sig = sigmoid(Z)
+    return dA * sig * (1 - sig)
 
 # -------------------------------- Forward Pass --------------------------------------
 def single_forward_propagation(A_prev, W_curr, b_curr, activation="relu"):
