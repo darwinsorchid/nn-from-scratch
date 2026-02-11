@@ -187,8 +187,46 @@ def accuracy(y_hat, y):
 
 
 # -------------------------------- Backpropagation -----------------------------------
-def single_backprop():
-    pass
+def single_backprop(dA_curr, Z_curr, W_curr, b_curr, A_prev, activation="relu"):
+    '''
+    Calculate partial derivatives w.r.t. weights and biases for current layer.
+    
+    :param dA_curr: Derivative of current layer activation
+    :param Z_curr: Intermediate output of current layer
+    :param W_curr: Weight matrix of current layer
+    :param b_curr: Bias vector of current layer
+    :param A_prev: Matrix of previous layer activation values
+    :param activation: Activation function of current layer
+    '''
+
+    # Get number of samples
+    n = A_prev.shape[1]
+
+    # Get activation function to apply derivative
+    if activation == "relu":
+        backwards_act = relu_backprop
+    elif activation == "sigmoid":
+        backwards_act = sigmoid_backprop
+    else:
+        raise Exception('Non-valid activation function.')
+
+
+    # Calculate activation function derivative
+    dZ_curr = backwards_act(dA_curr, Z_curr)
+
+    # Calculate dW (derivative of matrix W)
+    dW_curr = np.dot(dZ_curr, A_prev.T) / n
+
+    # Calculate db (derivative of vector b)
+    db_curr = np.sum(dZ_curr, axis=1, keepdims=True) / n
+
+    # Calculate dA_prev (derivative of matrix A of previous layer)
+    dA_prev = np.dot(W_curr, dZ_curr)
+
+    return dA_prev, dW_curr, db_curr
+
+
+
 
 def full_backprop():
     pass
