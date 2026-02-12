@@ -69,10 +69,16 @@ $$
 
 Backpropagation is implemented by applying the chain rule:
 
-1. Partial derivative of L w.r.t. the weights:
+1. Partial derivative of $L$ w.r.t. the weights:
 
 $$
 dW^{[l]} = \frac{\partial L}{\partial W^{[l]}_{ij}} = \frac{\partial L}{\partial A^{[l]}} \frac{\partial A^{[l]}}{\partial Z^{[l]}} \frac{\partial Z^{[l]}}{\partial W^{[l]}_{ij}}
+$$
+
+The gradient descent algorithm begins by calculating the derivative of the loss function $L$ w.r.t. the prediction vector $\hat{y}$:
+
+$$
+\frac{\partial L}{\partial \hat{y}} = - (\frac{y}{\hat{y}} - \frac{1-y}{1-\hat{y}})
 $$
 
 [^1]: [Rumelhart, David E., Geoffrey E. Hinton, and Ronald J. Williams. "Learning representations by back-propagating errors." nature 323.6088 (1986): 533–536](https://doi.org/10.1038/323533a0)

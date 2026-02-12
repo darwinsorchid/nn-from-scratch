@@ -199,7 +199,7 @@ def single_backprop(dA_curr, Z_curr, W_curr, b_curr, A_prev, activation="relu"):
     :param activation: Activation function of current layer
     '''
 
-    # Get number of samples
+    # Get number of examples
     n = A_prev.shape[1]
 
     # Get activation function to apply derivative
@@ -227,9 +227,55 @@ def single_backprop(dA_curr, Z_curr, W_curr, b_curr, A_prev, activation="relu"):
 
 
 
+def full_backprop(y_hat, y, memory, params, nn_architecture):
+    '''
+    Backward propagation of errors: iterates backwards through the layers
+    and calculates partial derivatives. 
+    Returns dictionary of gradient values for weights and biases of each layer.
+    
+    :param y_hat: Prediction vector
+    :param y: True labels
+    :param memory: Dictionary with intermediate prediction vectors from each layer
+    :param params: Weights and biases of each layer
+    :param nn_architecture: Network architecture list of dicts
+    '''
+    
+    # Initialize dictionary of gradient values
+    grads_values = {}
 
-def full_backprop():
-    pass
+    # Number of examples
+    n = y.shape[1]
+    # Ensure same shape of prediction vector and labels vector
+    y = y.reshape(y_hat.shape)
+
+    # Derivative of binary cross-entropy loss function w.r.t. ŷ
+    dA_prev = - (np.divide(y, y_hat) - np.divide(1-y, 1-y_hat))
+
+    for layer_idx_prev, layer in reversed(list(enumerate(nn_architecture))):
+        layer_idx_curr = layer_idx_prev + 1
+
+        # extract activation func of current layer
+        activation_func_curr = layer["activation"]
+
+        dA_curr = dA_prev
+
+        # Get params and derivatives
+        A_prev = memory[f"A{layer_idx_prev}"]
+        Z_curr = memory[f"Z{layer_idx_curr}"]
+
+        W_curr = params[f"W{layer_idx_curr}"]
+        b_curr = params[f"b{layer_idx_curr}"]
+
+        # Do backprop for current layer
+        dA_prev, dW_curr, db_curr = single_backprop(dA_curr, Z_curr, W_curr, b_curr, A_prev, activation_func_curr)
+        
+        # Save gradients 
+        grads_values[f"dW{layer_idx_curr}"] = dW_curr
+        grads_values[f"db{layer_idx_curr}"] = db_curr
+
+    return grads_values
+
+
 
 def update_params():
     pass
