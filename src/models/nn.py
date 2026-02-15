@@ -276,9 +276,22 @@ def full_backprop(y_hat, y, memory, params, nn_architecture):
     return grads_values
 
 
+def update_params(params, grads, nn_architecture, learning_rate):
+    '''
+    Simple optimization algorithm; update network parameters using gradient optimization 
+    -> Try to bring target function to a minimum.
+    
+    :param params: Dictionary with parameter values (weights, biases) for each layer
+    :param grads: Dictionary with cost function derivative values w.r.t. parameters (weights, biases) for each layer
+    :param nn_architecture: List of dicts for network's architecture
+    :param learning_rate: Defines how big of a parameter change to be applied
+    '''
 
-def update_params():
-    pass
+    for idx, layer in enumerate(nn_architecture, 1):
+        params[f"W{idx}"] -= learning_rate * grads[f"dW{idx}"]
+        params[f"b{idx}"] -= learning_rate * grads[f"db{idx}"]
+
+    return params
 
 
 if __name__ == "__main__":
