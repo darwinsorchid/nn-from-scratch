@@ -2,4 +2,6 @@ my-notes/
 logs/
 nn-venv/
 
-__init__.py
+results/
+
+data/datasets/

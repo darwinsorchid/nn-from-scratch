@@ -1,4 +1,3 @@
-import numpy
 from src.models import nn
 
 def train(X, Y, nn_architecture, epochs, learning_rate, verbose=False, callback=None):
