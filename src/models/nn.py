@@ -70,7 +70,7 @@ def sigmoid(Z):
 
 def relu_backprop(dA, Z):
     dZ = np.array(dA, copy=True)
-    dZ[dZ >= 0] = 0
+    dZ[dZ <= 0] = 0
     return dZ    
 
 def sigmoid_backprop(dA, Z):
@@ -148,8 +148,14 @@ def loss_function(y_hat, y):
     # Number of examples
     n = y_hat.shape[1]
 
+    # Add clipping to avoid breaking gradient descent when np.log(0)
+    eps = 1e-15
+    y_hat = np.clip(y_hat, eps, 1 - eps)
+
     # Calculate loss according to BCE formula
-    bce = - 1 / n * (np.dot(y, np.log(y_hat).T)) + np.dot(1-y, np.log(1-y_hat).T)
+    bce = - 1 / n * (
+        np.dot(y, np.log(y_hat).T) + np.dot(1-y, np.log(1-y_hat).T)
+    )
 
     return np.squeeze(bce)
 
@@ -221,7 +227,7 @@ def single_backprop(dA_curr, Z_curr, W_curr, b_curr, A_prev, activation="relu"):
     db_curr = np.sum(dZ_curr, axis=1, keepdims=True) / n
 
     # Calculate dA_prev (derivative of matrix A of previous layer)
-    dA_prev = np.dot(W_curr, dZ_curr)
+    dA_prev = np.dot(W_curr.T, dZ_curr)
 
     return dA_prev, dW_curr, db_curr
 

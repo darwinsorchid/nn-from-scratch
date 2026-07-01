@@ -36,7 +36,7 @@ def main():
 
     # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ NUMPY NN ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     # Train
-    params_values = train(np.transpose(x_train), np.transpose(y_train.reshape((y_train.shape[0], 1))), NN_ARCHITECTURE, EPOCHS, LEARNING_RATE)[0]
+    params_values = train(np.transpose(x_train), np.transpose(y_train.reshape((y_train.shape[0], 1))), NN_ARCHITECTURE, EPOCHS, LEARNING_RATE)
 
     # Get predictions on test set
     y_preds, _ = nn.full_forward_propagation(np.transpose(x_test), params_values, NN_ARCHITECTURE)
