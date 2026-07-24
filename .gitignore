@@ -1,7 +1,8 @@
 my-notes/
 logs/
 nn-venv/
-
+*.pyc
+__pycache__/
 results/
 
 data/datasets/

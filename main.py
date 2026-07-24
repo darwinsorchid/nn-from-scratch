@@ -1,7 +1,8 @@
 import os
 import keras
 from src.models.keras_model import build_model, train_keras, test_keras
-from data.generate_data import generate_data, plot_data
+from data.generate_data import generate_data
+from src.utils.visualize import _make_plot
 from data.preprocess_data import process_data
 from src.training.train import train
 from src.models import nn
@@ -29,7 +30,7 @@ def main():
     # Get moon data
     X, y = generate_data()
     # Get data plot
-    plot_data(X, y, plot_title="Dataset", file_name=os.path.join(OUTPUT_DIR, "moon_data.png"))
+    _make_plot(X, y, plot_title="Dataset", file_name=os.path.join(OUTPUT_DIR, "moon_data.png"))
 
     # Preprocessing
     x_train, x_test, y_train, y_test = process_data(DF_FILE_NAME)
