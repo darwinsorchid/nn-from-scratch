@@ -1,6 +1,6 @@
 my-notes/
 logs/
-nn-venv/
+venv/
 *.pyc
 __pycache__/
 results/

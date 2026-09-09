@@ -2,37 +2,38 @@ import numpy as np
 import logging
 
 # ------------------------------------------ Initialization --------------------------------------------------
-# Configure logging and initialize logger
-logging.basicConfig(
-    filename="logs/init.log",
-    filemode="w",
-    level=logging.DEBUG,
-    format="%(asctime)s | %(levelname)s | %(message)s"
-)
 
-logger = logging.getLogger(__name__)
 
+def init_logger():
+    # Configure logging and initialize logger
+    logging.basicConfig(
+        filename="logs/init.log",
+        filemode="w",
+        level=logging.DEBUG,
+        format="%(asctime)s | %(levelname)s | %(message)s",
+    )
+
+    logger = logging.getLogger(__name__)
+    return logger
 
 
 # Initialize architecture
 nn_architecture = [
-    {"input_dim": 2, "output_dim": 4, "activation": "relu"},
-    {"input_dim": 4, "output_dim": 6, "activation": "relu"},
-    {"input_dim": 6, "output_dim": 6, "activation": "relu"},
-    {"input_dim": 6, "output_dim": 4, "activation": "relu"},
-    {"input_dim": 4, "output_dim": 1, "activation": "sigmoid"}
+    {"input_dim": 2, "output_dim": 32, "activation": "relu"},
+    {"input_dim": 32, "output_dim": 16, "activation": "relu"},
+    {"input_dim": 16, "output_dim": 1, "activation": "sigmoid"},
 ]
 
 
 def init_layers(nn_architecture, seed=42):
-    '''Initialize layers and parameter values per layer: 
+    """Initialize layers and parameter values per layer:
         • weight matrix (output_dim, input_dim)
         • bias vector   (output_dim, 1)
     Returns params dict and logs initial parameters to init.log file.
-    
+
     :param nn_architecture: Network architecture as a list of dictionaries for each layer of the net.
-    :param seed: Set seed 
-    '''
+    :param seed: Set seed
+    """
 
     # Set seed and initialize params dict
     np.random.seed(seed)
@@ -40,20 +41,17 @@ def init_layers(nn_architecture, seed=42):
 
     for idx, layer in enumerate(nn_architecture):
         layer_idx = idx + 1
-        input_dim = layer['input_dim']
-        output_dim = layer['output_dim']
+        input_dim = layer["input_dim"]
+        output_dim = layer["output_dim"]
 
         # Populate params with weight matrix of (output, input) dimensions and bias vector of (output, 1) dimensions
         params[f"W{layer_idx}"] = np.random.randn(output_dim, input_dim) * 0.1
         params[f"b{layer_idx}"] = np.random.randn(output_dim, 1) * 0.1
 
-
     # More readable output
-    np.set_printoptions(
-        precision = 4,
-        suppress = True,
-        linewidth = 120
-    )
+    np.set_printoptions(precision=4, suppress=True, linewidth=120)
+
+    logger = init_logger()
     # Log initial parameters to file
     logger.debug("Parameter Values:\n %s", params)
 
@@ -62,31 +60,36 @@ def init_layers(nn_architecture, seed=42):
 
 # ---------------------------- Activations Functions ---------------------------------
 
+
 def relu(Z):
     return np.maximum(0, Z)
+
 
 def sigmoid(Z):
     return 1 / (1 + np.exp(-Z))
 
+
 def relu_backprop(dA, Z):
     dZ = np.array(dA, copy=True)
-    dZ[dZ <= 0] = 0
-    return dZ    
+    dZ[Z <= 0] = 0
+    return dZ
+
 
 def sigmoid_backprop(dA, Z):
     sig = sigmoid(Z)
     return dA * sig * (1 - sig)
 
+
 # -------------------------------- Forward Pass --------------------------------------
 def single_forward_propagation(A_prev, W_curr, b_curr, activation="relu"):
-    '''
+    """
     Forward propagation for a single layer.
-    
+
     :param A_prev: Activation vector of previous layer.
     :param W_curr: Weight matrix of current layer.
     :param b_curr: Bias vector of current layer.
     :param activation: Activation function of current layer.
-    '''
+    """
     # Calculate Z_curr
     Z_curr = np.dot(W_curr, A_prev) + b_curr
 
@@ -95,19 +98,19 @@ def single_forward_propagation(A_prev, W_curr, b_curr, activation="relu"):
     elif activation == "sigmoid":
         act_func = sigmoid
     else:
-        raise Exception('Non-valid activation function.')
-    
+        raise Exception("Non-valid activation function.")
+
     # Return calculated activation A and intermediate output matrix Z
     return act_func(Z_curr), Z_curr
 
 
 def full_forward_propagation(X, params, nn_architecture):
-    '''
+    """
     Iterates through all network layers and does forward propagation.
-    
+
     :param X: Input vector (activation of layer 0)
     :param nn_architecture: Network architecture
-    '''
+    """
     # Initialize temporary memory to store params and outputs - to be used later for backward prop.
     memory = {}
 
@@ -124,7 +127,7 @@ def full_forward_propagation(X, params, nn_architecture):
         W_curr = params[f"W{layer_idx}"]
         b_curr = params[f"b{layer_idx}"]
         act_func = layer["activation"]
-        
+
         # Do forward propagation for current layer
         A_curr, Z_curr = single_forward_propagation(A_prev, W_curr, b_curr, act_func)
 
@@ -138,13 +141,13 @@ def full_forward_propagation(X, params, nn_architecture):
 
 # ---------------------------------- Loss & Accuracy ----------------------------------
 def loss_function(y_hat, y):
-    '''
+    """
     Calculate loss function.
     Binary Cross-Entropy (BCE) loss for binary classification problems.
-    
+
     :param y_hat: Vector of network prediction probabilities
     :param y: Vector of actual labels.
-    '''
+    """
     # Number of examples
     n = y_hat.shape[1]
 
@@ -153,30 +156,28 @@ def loss_function(y_hat, y):
     y_hat = np.clip(y_hat, eps, 1 - eps)
 
     # Calculate loss according to BCE formula
-    bce = - 1 / n * (
-        np.dot(y, np.log(y_hat).T) + np.dot(1-y, np.log(1-y_hat).T)
-    )
+    bce = -1 / n * (np.dot(y, np.log(y_hat).T) + np.dot(1 - y, np.log(1 - y_hat).T))
 
     return np.squeeze(bce)
 
 
 def prob_to_label(probs):
-    '''
+    """
     Turns predicted probabilities to binary labels 0 / 1.
 
     :param probs: Vector containing predicted probabilities.
-    '''
+    """
     probs_ = np.copy(probs)
 
     # Threshold probabilities and turn to binary labels.
     probs_[probs_ > 0.5] = 1
-    probs_[probs_ <= 0.5] = 0 
+    probs_[probs_ <= 0.5] = 0
 
     return probs_
 
 
 def accuracy(y_hat, y):
-    '''
+    """
     Get model accuracy:
     1) Element-wise comparison of predicted vs true labels
     2) Get a True/False value for each column
@@ -184,7 +185,7 @@ def accuracy(y_hat, y):
 
     :param y_hat: Predicted probability vector
     :param y: Real labels
-    '''
+    """
     # Turn predicted probabilities to binary labels
     y_hat_ = prob_to_label(y_hat)
 
@@ -194,16 +195,16 @@ def accuracy(y_hat, y):
 
 # -------------------------------- Backpropagation -----------------------------------
 def single_backprop(dA_curr, Z_curr, W_curr, b_curr, A_prev, activation="relu"):
-    '''
+    """
     Calculate partial derivatives w.r.t. weights and biases for current layer.
-    
+
     :param dA_curr: Derivative of current layer activation
     :param Z_curr: Intermediate output of current layer
     :param W_curr: Weight matrix of current layer
     :param b_curr: Bias vector of current layer
     :param A_prev: Matrix of previous layer activation values
     :param activation: Activation function of current layer
-    '''
+    """
 
     # Get number of examples
     n = A_prev.shape[1]
@@ -214,8 +215,7 @@ def single_backprop(dA_curr, Z_curr, W_curr, b_curr, A_prev, activation="relu"):
     elif activation == "sigmoid":
         backwards_act = sigmoid_backprop
     else:
-        raise Exception('Non-valid activation function.')
-
+        raise Exception("Non-valid activation function.")
 
     # Calculate activation function derivative
     dZ_curr = backwards_act(dA_curr, Z_curr)
@@ -232,20 +232,19 @@ def single_backprop(dA_curr, Z_curr, W_curr, b_curr, A_prev, activation="relu"):
     return dA_prev, dW_curr, db_curr
 
 
-
 def full_backprop(y_hat, y, memory, params, nn_architecture):
-    '''
+    """
     Backward propagation of errors: iterates backwards through the layers
-    and calculates partial derivatives. 
+    and calculates partial derivatives.
     Returns dictionary of gradient values for weights and biases of each layer.
-    
+
     :param y_hat: Prediction vector
     :param y: True labels
     :param memory: Dictionary with intermediate prediction vectors from each layer
     :param params: Weights and biases of each layer
     :param nn_architecture: Network architecture list of dicts
-    '''
-    
+    """
+
     # Initialize dictionary of gradient values
     grads_values = {}
 
@@ -255,7 +254,7 @@ def full_backprop(y_hat, y, memory, params, nn_architecture):
     y = y.reshape(y_hat.shape)
 
     # Derivative of binary cross-entropy loss function w.r.t. ŷ
-    dA_prev = - (np.divide(y, y_hat) - np.divide(1-y, 1-y_hat))
+    dA_prev = -(np.divide(y, y_hat) - np.divide(1 - y, 1 - y_hat))
 
     for layer_idx_prev, layer in reversed(list(enumerate(nn_architecture))):
         layer_idx_curr = layer_idx_prev + 1
@@ -273,9 +272,11 @@ def full_backprop(y_hat, y, memory, params, nn_architecture):
         b_curr = params[f"b{layer_idx_curr}"]
 
         # Do backprop for current layer
-        dA_prev, dW_curr, db_curr = single_backprop(dA_curr, Z_curr, W_curr, b_curr, A_prev, activation_func_curr)
-        
-        # Save gradients 
+        dA_prev, dW_curr, db_curr = single_backprop(
+            dA_curr, Z_curr, W_curr, b_curr, A_prev, activation_func_curr
+        )
+
+        # Save gradients
         grads_values[f"dW{layer_idx_curr}"] = dW_curr
         grads_values[f"db{layer_idx_curr}"] = db_curr
 
@@ -283,15 +284,15 @@ def full_backprop(y_hat, y, memory, params, nn_architecture):
 
 
 def update_params(params, grads, nn_architecture, learning_rate):
-    '''
-    Simple optimization algorithm; update network parameters using gradient optimization 
+    """
+    Simple optimization algorithm; update network parameters using gradient optimization
     -> Try to bring target function to a minimum.
-    
+
     :param params: Dictionary with parameter values (weights, biases) for each layer
     :param grads: Dictionary with cost function derivative values w.r.t. parameters (weights, biases) for each layer
     :param nn_architecture: List of dicts for network's architecture
     :param learning_rate: Defines how big of a parameter change to be applied
-    '''
+    """
 
     for idx, layer in enumerate(nn_architecture, 1):
         params[f"W{idx}"] -= learning_rate * grads[f"dW{idx}"]
@@ -301,5 +302,4 @@ def update_params(params, grads, nn_architecture, learning_rate):
 
 
 if __name__ == "__main__":
-
     params = init_layers(nn_architecture)
