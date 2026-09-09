@@ -47,7 +47,7 @@ After computing predictions and prediction error (loss function) during the forw
 Backpropagation uses the _chain rule_ from calculus to "propagate" derivatives backward through the layers.
 It computes the gradient of a loss function w.r.t. the weights of the network for a single input-output example.
 
-1. Computes gradient of loss funcion w.r.t. each weight using the chain rule making it possible to update weights efficiently
+1. Computes gradient of loss function w.r.t. each weight using the chain rule making it possible to update weights efficiently
 2. Scales well to networks with multiple layers and complex architectures
 3. Enables automization of learning process - the model adjusts itself to optimize performance
 
